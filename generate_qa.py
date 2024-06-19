@@ -15,26 +15,26 @@ DATA_FOLDER = config.get('data_folder')
 CAPABILITIES_FILE = config.get('capabilities_file')
 SOW_FILE = config.get('sow_file')
 QUESTIONS_FILE = config.get('questions_file')
-RESULTS_FOLDER = 'results'
+RESULTS_FOLDER = config.get('results_folder', 'results')
 NUM_LINKS = config.get('num_links', 5)  # Default to 5 if not specified
+SERVER_URL = config.get('server_url')
+SEARCH_URL = config.get('search_url')
+WEB_SEARCH_COMPANY_NAME = config.get('web_search_company_name')
+INPUT_PROMPT = config.get('input_prompt')
 
 # Create results folder if it doesn't exist
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
-
-# Server URL
-server_url = "http://localhost:11434/api/generate"
-search_url = "http://localhost:8080/search"
 
 # Function to get answer from Ollama server
 def get_answer(question, context, model=MODEL):
     headers = {'Content-Type': 'application/json'}
     payload = {
         "model": model,
-        "prompt": f"Context: {context}\nQuestion: {question}",
+        "prompt": f"{INPUT_PROMPT}\n\nContext: {context}\nQuestion: {question}",
         "stream": False  # Ensure the response is not streamed
     }
     try:
-        response = requests.post(server_url, headers=headers, json=payload)
+        response = requests.post(SERVER_URL, headers=headers, json=payload)
         response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
         answer = response.json().get('response', 'No answer found')
         return answer, payload['prompt']
@@ -46,7 +46,7 @@ def get_answer(question, context, model=MODEL):
 def web_search(query):
     print(f"Performing web search for query: {query}")
     search_query = query.replace(" ", "+")
-    search_url_full = f"http://localhost:8080/search?q={search_query}&format=json"
+    search_url_full = f"{SEARCH_URL}?q={search_query}&format=json"
     print(f"Web search URL: {search_url_full}")
     try:
         response = requests.get(search_url_full)
@@ -130,7 +130,7 @@ context = base_context  # Start with the base context
 for i, question in enumerate(questions):
     print(f"\nProcessing question {i+1}/{len(questions)}: {question}")
     print("Waiting for web search results...")
-    web_info, web_links = web_search(f"Draken International {question}")
+    web_info, web_links = web_search(f"{WEB_SEARCH_COMPANY_NAME} {question}")
     web_info_text = "\n".join(web_info)
     web_links_text = "\n".join(web_links)
     num_web_hits = len(web_info)
