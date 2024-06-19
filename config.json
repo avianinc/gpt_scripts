@@ -1,0 +1,9 @@
+{
+    "model": "llama3",
+    "data_folder": "data",
+    "capabilities_file": "capabilities.txt",
+    "sow_file": "sow.txt",
+    "questions_file": "questions.txt",
+    "num_links": 5
+  }
+  
