@@ -1,14 +1,13 @@
 {
-    "model": "llama3",
+    "model": "llama3:70b",
+    "download_model": "llama3:70b",
     "data_folder": "data",
     "capabilities_file": "capabilities.txt",
     "sow_file": "sow.txt",
     "questions_file": "questions.txt",
-    "results_folder": "results",
     "num_links": 5,
     "server_url": "http://localhost:11434/api/generate",
     "search_url": "http://localhost:8080/search",
-    "web_search_company_name": "Draken International",
-    "input_prompt": "You are a helpful server capable of helping me understand how to better create responses to statements of work. You provide thorough analysis of capabilities, statements of work, and questions to assist in proposal writing. Your responses should include insights from the context provided and relevant external information gathered from web searches."
-  }
-  
+    "company_name": "Draken International",
+    "input_prompt": "You are a helpful server capable of helping me understand how to better create responses to statements of work."
+}
