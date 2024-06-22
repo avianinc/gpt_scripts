@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 import time
 import os
 from datetime import datetime
+import PyPDF2
+import io
+from Crypto.Cipher import AES
 
 # Load configuration
 CONFIG_FILE = 'config.json'
@@ -96,6 +99,8 @@ def extract_content(url):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        if url.lower().endswith('.pdf'):
+            return extract_pdf_content(response.content)
         soup = BeautifulSoup(response.text, 'html.parser')
         paragraphs = soup.find_all('p')
         content = ' '.join([para.get_text() for para in paragraphs])
@@ -104,6 +109,20 @@ def extract_content(url):
         print(f"HTTP error occurred: {http_err} for URL: {url}")
     except Exception as e:
         print(f"Error extracting content from {url}: {e}")
+    return ""
+
+# Function to extract text content from a PDF file
+def extract_pdf_content(pdf_content):
+    try:
+        pdf_text = ""
+        pdf_file = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+        if pdf_file.is_encrypted:
+            pdf_file.decrypt('')
+        for page_num in range(len(pdf_file.pages)):
+            pdf_text += pdf_file.pages[page_num].extract_text()
+        return pdf_text
+    except Exception as e:
+        print(f"Error extracting PDF content: {e}")
     return ""
 
 # Load the SOW text from a file
@@ -188,6 +207,9 @@ for query in initial_queries:
 
 initial_web_content_text, initial_cleaned_web_content, initial_used_links = process_web_content(initial_links)
 
+# Accumulated context
+context = base_context + f"\nInitial Web Summary: {initial_cleaned_web_content}\n\n"
+
 # Iterate over questions and get answers, including previous Q&A in the context
 answers = {}
 
@@ -197,9 +219,13 @@ for i, question in enumerate(questions):
     print(f"\nProcessing question {i+1}/{len(questions)}: {question}")
 
     # Extract the tag and actual question
-    tag, actual_question = question.split("}", 1)
-    tag = tag.strip("{").strip()
-    actual_question = actual_question.strip()
+    if "}" in question:
+        tag, actual_question = question.split("}", 1)
+        tag = tag.strip("{").strip()
+        actual_question = actual_question.strip()
+    else:
+        tag = "general"
+        actual_question = question.strip()
 
     if tag == "incumbent":
         print("Tag identified as 'incumbent'. Generating search queries for the question relative to the incumbent...")
@@ -238,8 +264,8 @@ for i, question in enumerate(questions):
     web_content_text, cleaned_web_content, used_links = process_web_content(web_links)
 
     print("Waiting to generate answer...")
-    context = base_context + f"\nWeb Summary: {initial_cleaned_web_content}\n{cleaned_web_content}\n\n"
-    prompt = f"{INPUT_PROMPT}\n\nContext: {context}\nQuestion: {actual_question}\nGoal: Help the Home Team ({HOME_TEAM}) win the business from the incumbent ({INCUMBENT_NAME})."
+    prompt_context = context + f"\nWeb Summary: {cleaned_web_content}\n\n"
+    prompt = f"{INPUT_PROMPT}\n\nContext: {prompt_context}\nQuestion: {actual_question}\nGoal: Help the Home Team ({HOME_TEAM}) win the business from the incumbent ({INCUMBENT_NAME})."
     answer = get_ollama_response(prompt, model=MODEL)
     answers[actual_question] = {
         "answer": answer,

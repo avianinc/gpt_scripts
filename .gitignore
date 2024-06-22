@@ -1,3 +1,4 @@
 /.conda
 /models
 /results
+/qdrant_storage

@@ -45,14 +45,6 @@ def get_ollama_response(prompt, model=MODEL):
         print(f"Error communicating with Ollama server: {e}")
         return "Error communicating with Ollama server"
 
-# Function to generate search queries using the language model
-def generate_search_queries(prompt, home_team, incumbent_name):
-    print("Generating search queries using the LLM...")
-    query_prompt = f"Generate search queries for the following prompt. Ensure to include the incumbent ({incumbent_name}) and home team ({home_team}) where relevant:\n\n{prompt}"
-    queries_response = get_ollama_response(query_prompt, model=MODEL)
-    queries = queries_response.split('\n')
-    return [query.strip() for query in queries if query.strip()]
-
 # Summarizer function to filter the web results into a summary
 def summarize_and_extract_key_points(web_contents):
     print("Summarizing and extracting key points from web contents...")
@@ -175,8 +167,11 @@ total_web_hits = 0
 total_processing_time = 0
 
 # Initial general queries about the incumbent
-initial_queries_prompt = f"Generate search queries to understand the incumbent's capabilities, comparative analysis, and specific strengths and weaknesses. Ensure to include the incumbent ({INCUMBENT_NAME}) and home team ({HOME_TEAM})."
-initial_queries = generate_search_queries(initial_queries_prompt, HOME_TEAM, INCUMBENT_NAME)
+initial_queries = [
+    f"{INCUMBENT_NAME} capabilities",
+    f"Comparison {HOME_TEAM} vs {INCUMBENT_NAME}",
+    f"Strengths and weaknesses of {INCUMBENT_NAME}"
+]
 
 initial_info = []
 initial_links = []
@@ -202,27 +197,19 @@ for i, question in enumerate(questions):
     actual_question = actual_question.strip()
 
     if tag == "incumbent":
-        print("Tag identified as 'incumbent'. Generating search queries for the question relative to the incumbent...")
-        # Generate queries specific to the question related to the incumbent
-        question_queries_prompt = f"Generate search queries for the following question relative to the incumbent ({INCUMBENT_NAME}). Ensure to include the incumbent ({INCUMBENT_NAME}) and home team ({HOME_TEAM}): {actual_question}"
+        print("Tag identified as 'incumbent'. Performing web search relative to incumbent...")
+        # Specific query for each question related to the incumbent
+        question_query = f"{INCUMBENT_NAME} {actual_question}"
     elif tag == "process":
-        print("Tag identified as 'process'. Generating search queries for the question related to process...")
-        # Generate queries specific to the question related to process
-        question_queries_prompt = f"Generate search queries for the following question related to process. Ensure to include the incumbent ({INCUMBENT_NAME}) and home team ({HOME_TEAM}): {actual_question}"
+        print("Tag identified as 'process'. Performing web search relative to process...")
+        # Specific query for each question related to process
+        question_query = f"{actual_question}"
     else:
-        print("Tag not identified. Defaulting to general search queries...")
-        # Generate default queries for general questions
-        question_queries_prompt = f"Generate search queries for the following question. Ensure to include the incumbent ({INCUMBENT_NAME}) and home team ({HOME_TEAM}): {actual_question}"
+        print("Tag not identified. Defaulting to general web search...")
+        # Default query for general questions
+        question_query = f"{actual_question}"
 
-    question_queries = generate_search_queries(question_queries_prompt, HOME_TEAM, INCUMBENT_NAME)
-
-    question_info = []
-    question_links = []
-
-    for query in question_queries:
-        info, links = web_search(query)
-        question_info.extend(info)
-        question_links.extend(links)
+    question_info, question_links = web_search(question_query)
 
     web_info = initial_info + question_info
     web_links = initial_links + question_links
@@ -282,17 +269,8 @@ for i, question in enumerate(questions):
     processing_time = end_time - start_time
     total_processing_time += processing_time
 
-# Generate final summary with context including incumbent and home team names
-final_summary_prompt = (
-    f"Summarize the opportunity, the incumbent's strengths and weaknesses, "
-    f"the Home Team's strengths and weaknesses, an analysis of the opportunity, "
-    f"and whether the Home Team ({HOME_TEAM}) should try and perform the work based on the Q&A results. "
-    f"Consider the following context: \n\n"
-    f"Incumbent: {INCUMBENT_NAME}\n\n"
-    f"Context from previous Q&A results:\n\n"
-    f"{context}"
-)
-
+# Generate final summary
+final_summary_prompt = f"Summarize the opportunity, the incumbent's strengths and weaknesses, the Home Team's strengths and weaknesses, an analysis of the opportunity, and whether the Home Team should try and perform the work based on the Q&A results."
 final_summary = get_ollama_response(final_summary_prompt, model=MODEL)
 
 # Save summary statistics and configuration variables to the results file

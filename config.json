@@ -1,13 +1,20 @@
-{
-    "model": "llama3:70b",
-    "download_model": "llama3:70b",
-    "data_folder": "data",
-    "capabilities_file": "capabilities.txt",
-    "sow_file": "sow.txt",
-    "questions_file": "questions.txt",
-    "num_links": 5,
-    "server_url": "http://localhost:11434/api/generate",
-    "search_url": "http://localhost:8080/search",
-    "company_name": "Draken International",
-    "input_prompt": "You are a helpful server capable of helping me understand how to better create responses to statements of work."
-}
+[
+    {
+      "model": "llama3:70b",
+      "data_folder": "data",
+      "capabilities_file": "capabilities.txt",
+      "sow_file": "sow.txt",
+      "questions_file": "questions.txt",
+      "results_folder": "results",
+      "num_links": 5,
+      "server_url": "http://localhost:11434/api/generate",
+      "search_url": "http://localhost:8080/search",
+      "web_search_company_name": "Draken International",
+      "input_prompt": "You are a helpful server assisting the Home Team in understanding and responding to a Statement of Work (SOW). The goal is to provide thorough analysis of capabilities, statements of work, and questions to help the Home Team propose better solutions and win the business from the incumbent, Draken International. Your responses should include insights from the provided context, relevant external information gathered from web searches, and strategic recommendations for supplanting the incumbent.",
+      "home_team": "Avian LLC",
+      "incumbent_name": "Draken International",
+      "clear_collection": true,
+      "web_search_keywords": ["Aerospace", "Proposal", "Proposal", "Competitive Analysis"]
+    }
+  ]
+  

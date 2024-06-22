@@ -1,0 +1,8 @@
+{incumbent} Give me a list of competitive analysis questions I should answer to win this work from an incumbent.
+{home team} Given our capabilities that my company has, what strengths and weaknesses do I have based on the solicitation statement of work?
+{process} What are my risks based on the statement of work?
+{home team} Given my capabilities, what gaps do I have for meeting statement of work requirements?
+{incumbent} How well has Draken International performed on previous ANG contracts?
+{process} Please give me key facts about the aircraft needed to perform this requirement.
+{incumbent} How should I propose to beat the incumbent Draken International?
+

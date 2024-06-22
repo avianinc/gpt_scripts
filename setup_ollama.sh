@@ -25,9 +25,11 @@ done
 echo "Ollama server is running."
 
 # Pull the model
-echo "Pulling model: $DOWNLOAD_MODEL"
-docker exec -it $(docker ps -q -f name=ollama) ollama pull $DOWNLOAD_MODEL
+echo "Pulling model: $MODEL"
+docker exec -it $(docker ps -q -f name=ollama) ollama pull $MODEL
 # docker exec -it $(docker ps -q -f name=ollama) ollama run $DOWNLOAD_MODEL
 echo "Model $DOWNLOAD_MODEL pulled successfully."
 
 echo "Setup completed successfully."
+
+# docker run -d -p 6333:6333 -p 6334:6334 -v $(pwd)/qdrant_storage:/qdrant/storage:z qdrant/qdrant
